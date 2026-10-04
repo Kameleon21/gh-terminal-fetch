@@ -1,0 +1,81 @@
+name: 'GitHub Terminal Fetch'
+description: 'A terminal that types a fetch command, prints a neofetch-style profile panel and paints your contribution graph'
+author: 'Kamil Rogozinski'
+branding:
+  icon: 'terminal'
+  color: 'purple'
+
+inputs:
+  username:
+    description: 'GitHub username to fetch the profile and contributions for'
+    required: false
+    default: ${{ github.repository_owner }}
+  output:
+    description: 'Output file path for the generated SVG'
+    required: false
+    default: 'terminal.svg'
+  host:
+    description: 'Host shown in the prompt (user@host). Defaults to your username'
+    required: false
+    default: ''
+  role:
+    description: 'Role line, e.g. "Software Engineer @ Acme". Text after @ is highlighted. Defaults to your bio or company'
+    required: false
+    default: ''
+  location:
+    description: 'Location line. Defaults to your profile location'
+    required: false
+    default: ''
+  stack:
+    description: 'Comma-separated languages or tools. Defaults to the languages of your recent repos'
+    required: false
+    default: ''
+  building:
+    description: 'Comma-separated projects. Defaults to your pinned repos. The first two also name the tmux windows'
+    required: false
+    default: ''
+  command:
+    description: 'Command typed into the terminal. Defaults to "fetch <username>"'
+    required: false
+    default: ''
+  github_token:
+    description: 'Token used to read the profile and contribution calendar'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  output_path:
+    description: 'Path to the generated SVG file'
+    value: ${{ steps.generate.outputs.output_path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Bun
+      uses: oven-sh/setup-bun@v2
+
+    - name: Generate Terminal Fetch
+      id: generate
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_USERNAME: ${{ inputs.username }}
+        INPUT_OUTPUT: ${{ github.workspace }}/${{ inputs.output }}
+        INPUT_HOST: ${{ inputs.host }}
+        INPUT_ROLE: ${{ inputs.role }}
+        INPUT_LOCATION: ${{ inputs.location }}
+        INPUT_STACK: ${{ inputs.stack }}
+        INPUT_BUILDING: ${{ inputs.building }}
+        INPUT_COMMAND: ${{ inputs.command }}
+      run: |
+        mkdir -p "$(dirname "$INPUT_OUTPUT")"
+        bun "${{ github.action_path }}/src/cli.ts" \
+          --username "$INPUT_USERNAME" \
+          --output "$INPUT_OUTPUT" \
+          --host="$INPUT_HOST" \
+          --role="$INPUT_ROLE" \
+          --location="$INPUT_LOCATION" \
+          --stack="$INPUT_STACK" \
+          --building="$INPUT_BUILDING" \
+          --command="$INPUT_COMMAND"
+        echo "output_path=$INPUT_OUTPUT" >> "$GITHUB_OUTPUT"

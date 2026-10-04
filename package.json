@@ -1,0 +1,14 @@
+{
+  "name": "gh-terminal-fetch",
+  "version": "1.0.0",
+  "description": "A terminal that runs a neofetch-style fetch of your GitHub profile and paints your contribution graph",
+  "type": "module",
+  "private": true,
+  "bin": { "gh-terminal-fetch": "src/cli.ts" },
+  "scripts": {
+    "build": "bun src/cli.ts --username Kameleon21 --output terminal.svg --host dublin --role \"Software Engineer @ Citi\" --location \"Dublin, Ireland\" --stack \"Java, Go, TypeScript\" --building \"oku, tokenlens, tmux-claude\" --command \"oku fetch kameleon21\"",
+    "preview": "bun scripts/preview.ts terminal.svg 4 8 12",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": { "@types/bun": "latest", "typescript": "^5" }
+}
